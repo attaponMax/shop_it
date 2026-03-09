@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const categories = [
   { label: "⚡ Flash Sale", href: "/deals", hot: true },
@@ -10,9 +10,6 @@ const categories = [
   { label: "หูฟัง & ลำโพง", href: "/category/headset" },
   { label: "Monitor", href: "/category/monitor" },
   { label: "Storage & SSD", href: "/category/storage" },
-  { label: "Gaming Gear", href: "/category/gaming" },
-  { label: "แบรนด์ยอดนิยม", href: "/brands" },
-  { label: "ลดราคา", href: "/sale", sale: true },
 ];
 
 export default function Navbar() {
