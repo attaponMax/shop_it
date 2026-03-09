@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 const categories = [
   { label: "⚡ Flash Sale", href: "/deals", hot: true },
@@ -16,6 +17,17 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount] = useState(3);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) return;
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+    setSearchQuery("");
+    setIsMenuOpen(false);
+  };
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
@@ -25,12 +37,6 @@ export default function Navbar() {
 
   return (
     <div>
-      {/* Promo Bar */}
-      <div className="bg-orange-600 text-white text-center text-xs font-medium tracking-wide py-1.5 px-4">
-        ⚡ Flash Sale สูงสุด 50% &nbsp;·&nbsp; ส่งฟรีทั่วไทย เมื่อซื้อครบ 500 บาท &nbsp;·&nbsp; โค้ด{" "}
-        <span className="font-bold bg-white/20 rounded px-1.5 py-0.5 mx-1">FREESHIP500</span>
-      </div>
-
       {/* Main Navbar */}
       <nav
         className={`sticky top-0 z-50 bg-gray-950 border-b border-white/10 transition-shadow duration-300 ${
@@ -51,19 +57,21 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar */}
-          <div className="relative flex-1 max-w-xl hidden md:block">
+          <form onSubmit={handleSearch} className="relative flex-1 max-w-xl hidden md:block">
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาสินค้า เช่น keyboard, mouse, headset..."
               className="w-full bg-gray-800 border border-white/10 rounded-full py-2.5 pl-4 pr-14 text-sm text-white placeholder-gray-500 outline-none focus:border-amber-400 transition-colors"
             />
-            <button className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-amber-400 hover:bg-amber-300 transition-colors rounded-full w-8 h-8 flex items-center justify-center text-gray-950">
+            <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-amber-400 hover:bg-amber-300 transition-colors rounded-full w-8 h-8 flex items-center justify-center text-gray-950">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" />
                 <path d="M21 21l-4.35-4.35" />
               </svg>
             </button>
-          </div>
+          </form>
 
           {/* Right Actions */}
           <div className="flex items-center gap-1 ml-auto">
@@ -160,23 +168,21 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden bg-gray-900 border-t border-white/10 px-4 py-4 space-y-4">
             {/* Mobile Search */}
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ค้นหา keyboard, mouse, headset..."
                 className="w-full bg-gray-800 border border-white/10 rounded-xl py-2.5 pl-4 pr-10 text-sm text-white placeholder-gray-500 outline-none focus:border-amber-400 transition-colors"
               />
-              <svg
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-            </div>
+              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
+                <svg className="w-4 h-4 text-gray-500 hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </button>
+            </form>
 
             {/* Mobile Category Links */}
             <div className="flex flex-col gap-0.5">
