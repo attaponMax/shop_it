@@ -3,6 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+// ─── Supabase Client ──────────────────────────────────────────
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 function PasswordStrength({ password }) {
   const checks = [
@@ -20,12 +27,9 @@ function PasswordStrength({ password }) {
     { label: "แข็งแกร่ง", color: "bg-green-400" },
   ];
   const level = levels[score];
-
   if (!password) return null;
-
   return (
     <div className="mt-2 space-y-2">
-      {/* Bar */}
       <div className="flex gap-1">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${i <= score ? level.color : "bg-white/10"}`} />
@@ -35,11 +39,10 @@ function PasswordStrength({ password }) {
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           {checks.map((c) => (
             <span key={c.label} className={`flex items-center gap-1 text-[10px] transition-colors ${c.pass ? "text-green-400" : "text-gray-600"}`}>
-              {c.pass ? (
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-              ) : (
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-              )}
+              {c.pass
+                ? <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                : <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+              }
               {c.label}
             </span>
           ))}
@@ -59,11 +62,15 @@ export default function RegisterPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  // ── เพิ่ม: global error และ success state ──
+  const [globalError, setGlobalError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const set = (field) => (e) => {
     const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
+    setGlobalError("");
   };
 
   const validate = () => {
@@ -80,19 +87,118 @@ export default function RegisterPage() {
     return errs;
   };
 
+  // ── เพิ่ม: Google Sign Up ─────────────────────────────────────
+  const handleGoogleSignUp = async () => {
+    setGlobalError("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        // ส่ง role: 'user' ไปด้วยผ่าน metadata
+        queryParams: { access_type: "offline", prompt: "consent" },
+      },
+    });
+    if (error) setGlobalError("ไม่สามารถเชื่อมต่อ Google ได้ กรุณาลองใหม่อีกครั้ง");
+  };
+
+  // ── แก้ไข: handleSubmit เชื่อม Supabase ──────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setGlobalError("");
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+
     setIsLoading(true);
-    await new Promise((res) => setTimeout(res, 1400));
-    setIsLoading(false);
-    router.push("/");
+    try {
+      // 1. สมัครด้วย Supabase Auth
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            name: `${form.firstName} ${form.lastName}`,
+            avatar_url: null,
+          },
+        },
+      });
+
+      if (signUpError) {
+        // แปล error message เป็นภาษาไทย
+        if (signUpError.message.includes("already registered")) {
+          setErrors((prev) => ({ ...prev, email: "อีเมลนี้มีบัญชีอยู่แล้ว" }));
+        } else {
+          setGlobalError(signUpError.message);
+        }
+        return;
+      }
+
+      // 2. Insert ข้อมูลเพิ่มเติมลง users table — role บังคับเป็น 'user'
+      if (data.user) {
+        const { error: insertError } = await supabase.from("users").insert({
+          id: data.user.id,
+          name: `${form.firstName} ${form.lastName}`,
+          email: form.email,
+          role: "user",            // ← บังคับ user เสมอ ห้าม admin สมัครเอง
+          email_verified: null,    // รอยืนยันอีเมล
+        });
+
+        if (insertError) {
+          // ถ้า user มีอยู่แล้วใน table ไม่ถือว่า error
+          if (!insertError.message.includes("duplicate")) {
+            setGlobalError("สร้างโปรไฟล์ไม่สำเร็จ กรุณาติดต่อ support");
+            return;
+          }
+        }
+      }
+
+      // 3. แสดง success — แจ้งให้ยืนยันอีเมล
+      setSuccess(true);
+
+    } catch {
+      setGlobalError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputBase = "w-full bg-gray-900 border rounded-xl py-3 px-4 text-sm text-white placeholder-gray-600 outline-none transition-colors";
   const inputNormal = `${inputBase} border-white/10 focus:border-amber-400`;
-  const inputError = `${inputBase} border-red-500/60 focus:border-red-500`;
+  const inputError  = `${inputBase} border-red-500/60 focus:border-red-500`;
+
+  // ── Success Screen ────────────────────────────────────────────
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+        <div className="max-w-sm w-full text-center">
+          <div className="w-20 h-20 bg-green-400/10 border border-green-400/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">ยืนยันอีเมลของคุณ</h2>
+          <p className="text-gray-400 text-sm mb-2">
+            เราส่งลิงก์ยืนยันไปที่
+          </p>
+          <p className="text-amber-400 font-semibold text-sm mb-6">{form.email}</p>
+          <p className="text-gray-500 text-xs mb-8">
+            กรุณาเปิดอีเมลและกดลิงก์ยืนยันเพื่อเริ่มใช้งาน ShopSanook
+          </p>
+          <Link href="/login"
+            className="w-full inline-block bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold py-3 rounded-xl text-sm transition-all hover:-translate-y-0.5">
+            ไปหน้าเข้าสู่ระบบ
+          </Link>
+          <p className="text-gray-600 text-xs mt-4">
+            ไม่ได้รับอีเมล?{" "}
+            <button
+              onClick={() => supabase.auth.resend({ type: "signup", email: form.email })}
+              className="text-amber-400 hover:text-amber-300 transition-colors">
+              ส่งอีกครั้ง
+            </button>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
@@ -107,7 +213,6 @@ export default function RegisterPage() {
         <div className="absolute top-1/4 left-1/3 w-72 h-72 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-blue-500/8 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center text-gray-950 font-bold text-xl">S</div>
           <div>
@@ -116,21 +221,16 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Copy */}
         <div className="relative z-10 flex-1 flex flex-col justify-center">
           <p className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-4">สมัครสมาชิกฟรี</p>
           <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-            เริ่มต้น
-            <br />
-            <span className="text-amber-400">ช้อปสนุก</span>
-            <br />
+            เริ่มต้น<br />
+            <span className="text-amber-400">ช้อปสนุก</span><br />
             วันนี้เลย
           </h1>
           <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
             สมัครสมาชิกเพื่อรับสิทธิ์พิเศษ โปรโมชั่นเอกสิทธิ์ และติดตามออเดอร์ได้ทุกที่ทุกเวลา
           </p>
-
-          {/* Benefits */}
           <div className="mt-8 space-y-3">
             {[
               { icon: "🎁", title: "รับส่วนลด 100 บาท", desc: "สำหรับการสั่งซื้อครั้งแรก" },
@@ -154,7 +254,6 @@ export default function RegisterPage() {
       {/* ─── RIGHT PANEL — form ─── */}
       <div className="flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-10 overflow-y-auto">
 
-        {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2.5 mb-8">
           <div className="w-9 h-9 rounded-xl bg-amber-400 flex items-center justify-center text-gray-950 font-bold text-lg">S</div>
           <div>
@@ -170,9 +269,21 @@ export default function RegisterPage() {
             <Link href="/login" className="text-amber-400 hover:text-amber-300 font-medium transition-colors">เข้าสู่ระบบ</Link>
           </p>
 
-          {/* Social signup */}
+          {/* ── เพิ่ม: Global Error Banner ── */}
+          {globalError && (
+            <div className="mb-4 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+              <svg className="w-4 h-4 text-red-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+              </svg>
+              <p className="text-red-400 text-xs">{globalError}</p>
+            </div>
+          )}
+
+          {/* Google signup — ── แก้: เรียก handleGoogleSignUp ── */}
           <div className="flex gap-3 mb-6">
-            <button className="flex-1 flex items-center justify-center gap-2 bg-gray-900 border border-white/10 hover:border-white/25 text-white text-sm py-2.5 rounded-xl transition-colors">
+            <button
+              onClick={handleGoogleSignUp}
+              className="flex-1 flex items-center justify-center gap-2 bg-gray-900 border border-white/10 hover:border-white/25 text-white text-sm py-2.5 rounded-xl transition-colors">
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -183,17 +294,14 @@ export default function RegisterPage() {
             </button>
           </div>
 
-          {/* Divider */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-white/8" />
             <span className="text-gray-600 text-xs">หรือสมัครด้วยอีเมล</span>
             <div className="flex-1 h-px bg-white/8" />
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* Name row */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm text-gray-400 mb-1.5">ชื่อ <span className="text-red-400">*</span></label>
@@ -209,7 +317,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm text-gray-400 mb-1.5">อีเมล <span className="text-red-400">*</span></label>
               <div className="relative">
@@ -224,7 +331,6 @@ export default function RegisterPage() {
               {errors.email && <p className="text-red-400 text-[10px] mt-1">{errors.email}</p>}
             </div>
 
-            {/* Phone */}
             <div>
               <label className="block text-sm text-gray-400 mb-1.5">เบอร์โทรศัพท์ <span className="text-gray-600 text-[10px]">(ไม่บังคับ)</span></label>
               <div className="relative">
@@ -238,7 +344,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm text-gray-400 mb-1.5">รหัสผ่าน <span className="text-red-400">*</span></label>
               <div className="relative">
@@ -262,7 +367,6 @@ export default function RegisterPage() {
               <PasswordStrength password={form.password} />
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label className="block text-sm text-gray-400 mb-1.5">ยืนยันรหัสผ่าน <span className="text-red-400">*</span></label>
               <div className="relative">
@@ -274,7 +378,6 @@ export default function RegisterPage() {
                 <input type={showConfirm ? "text" : "password"} value={form.confirmPassword} onChange={set("confirmPassword")}
                   placeholder="กรอกรหัสผ่านอีกครั้ง"
                   className={`${errors.confirmPassword ? inputError : inputNormal} pl-10 pr-11`} />
-                {/* Match indicator */}
                 {form.confirmPassword && (
                   <div className="absolute right-10 top-1/2 -translate-y-1/2">
                     {form.password === form.confirmPassword
@@ -294,7 +397,6 @@ export default function RegisterPage() {
               {errors.confirmPassword && <p className="text-red-400 text-[10px] mt-1">{errors.confirmPassword}</p>}
             </div>
 
-            {/* Agree */}
             <div>
               <label className="flex items-start gap-2.5 cursor-pointer group">
                 <div className="relative mt-0.5 flex-shrink-0">
@@ -317,7 +419,6 @@ export default function RegisterPage() {
               {errors.agree && <p className="text-red-400 text-[10px] mt-1 ml-6">{errors.agree}</p>}
             </div>
 
-            {/* Submit */}
             <button type="submit" disabled={isLoading}
               className="w-full bg-amber-400 hover:bg-amber-300 disabled:bg-amber-400/50 disabled:cursor-not-allowed text-gray-950 font-bold py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(251,191,36,0.3)] text-sm flex items-center justify-center gap-2">
               {isLoading ? (

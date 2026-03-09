@@ -199,7 +199,7 @@ function SectionHeader({ label, title }) {
 
 // ─── Mock Auth ────────────────────────────────────────────────
 // เปลี่ยนเป็น true เพื่อจำลอง login / false เพื่อทดสอบ redirect
-const MOCK_IS_LOGGED_IN = false;
+const MOCK_IS_LOGGED_IN = true;
 const MOCK_USER = { name: "สมชาย ใจดี", email: "somchai@email.com", role: "admin" };
 // เปลี่ยนเป็น false เพื่อทดสอบ user ที่ไม่ใช่ admin
 const MOCK_IS_ADMIN = MOCK_USER.role === "admin";
