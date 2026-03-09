@@ -11,6 +11,7 @@ const categories = [
   { label: "หูฟัง & ลำโพง", href: "/category/headset" },
   { label: "Monitor", href: "/category/monitor" },
   { label: "Storage & SSD", href: "/category/storage" },
+  { label: "Dashboard", href: "/dashboard" },
 ];
 
 export default function Navbar() {
