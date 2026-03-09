@@ -197,8 +197,86 @@ function SectionHeader({ label, title }) {
   );
 }
 
+// ─── Mock Auth ────────────────────────────────────────────────
+// เปลี่ยนเป็น true เพื่อจำลอง login / false เพื่อทดสอบ redirect
+const MOCK_IS_LOGGED_IN = false;
+const MOCK_USER = { name: "สมชาย ใจดี", email: "somchai@email.com", role: "admin" };
+// เปลี่ยนเป็น false เพื่อทดสอบ user ที่ไม่ใช่ admin
+const MOCK_IS_ADMIN = MOCK_USER.role === "admin";
+
+// ─── Not Logged In Screen ─────────────────────────────────────
+function NotLoggedIn() {
+  return (
+    <div className="min-h-screen bg-gray-950 text-white">
+      <Navbar />
+      <div className="max-w-md mx-auto px-4 py-24 flex flex-col items-center text-center relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="w-20 h-20 rounded-2xl bg-gray-900 border border-white/10 flex items-center justify-center mb-6">
+          <svg className="w-9 h-9 text-amber-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-bold text-white mb-2">เข้าสู่ระบบก่อนนะ</h1>
+        <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+          กรุณาเข้าสู่ระบบเพื่อเข้าถึง Dashboard
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <a href="/login" className="flex-1 text-center bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold py-3 rounded-xl text-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(251,191,36,0.3)]">
+            เข้าสู่ระบบ
+          </a>
+          <a href="/" className="flex-1 text-center border border-white/15 hover:bg-white/5 text-white font-medium py-3 rounded-xl text-sm transition-colors">
+            กลับหน้าแรก
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Access Denied Screen ─────────────────────────────────────
+function AccessDenied() {
+  return (
+    <div className="min-h-screen bg-gray-950 text-white">
+      <Navbar />
+      <div className="max-w-md mx-auto px-4 py-24 flex flex-col items-center text-center relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="w-20 h-20 rounded-2xl bg-gray-900 border border-red-500/20 flex items-center justify-center mb-6">
+          <svg className="w-9 h-9 text-red-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <span className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full mb-4">
+          403 — Access Denied
+        </span>
+        <h1 className="text-2xl font-bold text-white mb-2">ไม่มีสิทธิ์เข้าถึง</h1>
+        <p className="text-gray-400 text-sm mb-2 leading-relaxed">
+          หน้านี้สำหรับ <span className="text-amber-400 font-semibold">Admin</span> เท่านั้น
+        </p>
+        <p className="text-gray-600 text-xs mb-8">
+          logged in as: <span className="text-gray-400">{MOCK_USER.name}</span> · role: <span className="text-gray-400">{MOCK_USER.role}</span>
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <a href="/" className="flex-1 text-center bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold py-3 rounded-xl text-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(251,191,36,0.3)]">
+            กลับหน้าแรก
+          </a>
+          <a href="/contact" className="flex-1 text-center border border-white/15 hover:bg-white/5 text-white font-medium py-3 rounded-xl text-sm transition-colors">
+            ติดต่อ Admin
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Dashboard ────────────────────────────────────────────
+// Auth + Role guard — render ก่อน hooks ทำงานใน DashboardContent
 export default function ChatbotDashboard() {
+  if (!MOCK_IS_LOGGED_IN) return <NotLoggedIn />;
+  if (!MOCK_IS_ADMIN) return <AccessDenied />;
+  return <DashboardContent />;
+}
+
+function DashboardContent() {
   const [range, setRange] = useState("7 วัน");
   const [now, setNow] = useState("");
   const [activeNow, setActiveNow] = useState(34);
@@ -243,8 +321,13 @@ export default function ChatbotDashboard() {
                 </svg>
               </span>
               Chatbot KPI Dashboard
+              <span className="text-[10px] font-semibold bg-amber-400/10 border border-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full ml-1">
+                Admin
+              </span>
             </h1>
-            <p className="text-gray-500 text-xs mt-1">อัปเดตล่าสุด: {now}</p>
+            <p className="text-gray-500 text-xs mt-1">
+              อัปเดตล่าสุด: {now} · {MOCK_USER.name}
+            </p>
           </div>
 
           {/* Range selector */}
