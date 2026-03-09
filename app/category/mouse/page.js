@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
-import Link from "next/link";
 
 const filters = {
   type: ["ทั้งหมด", "Gaming", "Office", "Ergonomic", "Trackball"],
@@ -62,7 +62,7 @@ const products = [
     reviews: 312,
     badge: "ใหม่",
     badgeColor: "bg-blue-500 text-white",
-    img: "https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=500&q=80",
+    img: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRPWHg55_JjNQSS8jwoWzViKqGRMdgZoVZl9cOHmyQdFMly_3MGEnNEcAkxB5NY",
     tags: ["54g", "Tri-mode", "Aim Lab Edition"],
     inStock: true,
   },
@@ -116,45 +116,9 @@ const products = [
     reviews: 143,
     badge: null,
     badgeColor: "",
-    img: "https://images.unsplash.com/photo-1616763355548-1b606f439f86?w=500&q=80",
+    img: "https://assets.corsair.com/image/upload/c_pad,q_85,h_1100,w_1100,f_auto/products/Gaming-Mice/CH-931D100/M75_AIR_BLACK_RENDER_01.webp",
     tags: ["59g", "2000Hz Polling", "iCUE"],
     inStock: true,
-  },
-  {
-    id: 7,
-    name: "Zowie EC2-CW Wireless",
-    brand: "Zowie",
-    type: "Gaming",
-    connect: "Wireless",
-    dpi: "3,200 DPI",
-    dpiGroup: "< 6,400 DPI",
-    price: 5290,
-    originalPrice: 5990,
-    rating: 4.7,
-    reviews: 198,
-    badge: "Esports",
-    badgeColor: "bg-purple-500 text-white",
-    img: "https://images.unsplash.com/photo-1607853202273-232359e89b36?w=500&q=80",
-    tags: ["No Software", "Plug & Play", "Paracord Cable"],
-    inStock: true,
-  },
-  {
-    id: 8,
-    name: "HyperX Pulsefire Haste 2",
-    brand: "HyperX",
-    type: "Gaming",
-    connect: "Wired",
-    dpi: "26,000 DPI",
-    dpiGroup: "16,000+ DPI",
-    price: 1990,
-    originalPrice: 2590,
-    rating: 4.6,
-    reviews: 445,
-    badge: "ราคาดี",
-    badgeColor: "bg-green-500 text-white",
-    img: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=500&q=80",
-    tags: ["53g", "Honeycomb", "Wired"],
-    inStock: false,
   },
 ];
 

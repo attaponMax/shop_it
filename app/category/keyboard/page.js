@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
-import Link from "next/link";
 
 const filters = {
   type: ["ทั้งหมด", "Mechanical", "Membrane", "Optical", "Wireless"],
@@ -59,7 +59,7 @@ const products = [
     reviews: 634,
     badge: "ใหม่",
     badgeColor: "bg-blue-500 text-white",
-    img: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=500&q=80",
+    img: "https://computerlounge.co.nz/cdn/shop/files/2ac0734ff61f78dfd774e040e5a01dbf064159c3_Logitech_G915_TKL_Lightspeed_White_1.jpg?v=1729652933&width=900",
     tags: ["Slim", "Wireless", "RGB"],
     inStock: true,
   },
@@ -110,7 +110,7 @@ const products = [
     reviews: 321,
     badge: "ราคาดี",
     badgeColor: "bg-green-500 text-white",
-    img: "https://images.unsplash.com/photo-1524656855800-59465ebcec69?w=500&q=80",
+    img: "https://row.hyperx.com/cdn/shop/files/hyperx_alloy_origins_65_english_us_1_top_down.jpg?v=1740220815",
     tags: ["Compact", "RGB", "Detachable Cable"],
     inStock: false,
   },
@@ -127,7 +127,7 @@ const products = [
     reviews: 156,
     badge: "Premium",
     badgeColor: "bg-purple-500 text-white",
-    img: "https://images.unsplash.com/photo-1625842268584-8f3296236761?w=500&q=80",
+    img: "https://assets.corsair.com/image/upload/c_pad,q_85,h_1100,w_1100,f_auto/products/Gaming-Keyboards/CH-912A01A-NA/Gallery/K100_RGB_01.webp",
     tags: ["Optical Switch", "iCUE", "USB Hub"],
     inStock: true,
   },
@@ -144,7 +144,7 @@ const products = [
     reviews: 892,
     badge: "Best Value",
     badgeColor: "bg-amber-400 text-gray-950",
-    img: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=500&q=80",
+    img: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSegCBcTdTvEay0hAjBkq2SeQp5XHAoJ7Ar02kW1s9ZNhNV5UhdiAThcRLkdtS-",
     tags: ["Mac / Win", "Wireless", "Compact"],
     inStock: true,
   },
