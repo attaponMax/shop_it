@@ -4,15 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const categories = [
-  { label: "🔥 ดีลวันนี้", href: "/deals", hot: true },
-  { label: "เสื้อผ้า", href: "/category/clothing" },
-  { label: "รองเท้า", href: "/category/shoes" },
-  { label: "กระเป๋า", href: "/category/bags" },
-  { label: "อิเล็กทรอนิกส์", href: "/category/electronics" },
-  { label: "เครื่องสำอาง", href: "/category/beauty" },
-  { label: "ของใช้ในบ้าน", href: "/category/home" },
+  { label: "⚡ Flash Sale", href: "/deals", hot: true },
+  { label: "คีย์บอร์ด", href: "/category/keyboard" },
+  { label: "เมาส์", href: "/category/mouse" },
+  { label: "หูฟัง & ลำโพง", href: "/category/headset" },
+  { label: "Monitor", href: "/category/monitor" },
+  { label: "Webcam", href: "/category/webcam" },
+  { label: "Storage & SSD", href: "/category/storage" },
+  { label: "Gaming Gear", href: "/category/gaming" },
   { label: "แบรนด์ยอดนิยม", href: "/brands" },
-  { label: "สินค้าใหม่", href: "/new" },
   { label: "ลดราคา", href: "/sale", sale: true },
 ];
 
@@ -31,7 +31,7 @@ export default function Navbar() {
     <div>
       {/* Promo Bar */}
       <div className="bg-orange-600 text-white text-center text-xs font-medium tracking-wide py-1.5 px-4">
-        🎉 ส่งฟรีทั่วไทย เมื่อซื้อครบ 500 บาท &nbsp;·&nbsp; ใช้โค้ด{" "}
+        ⚡ Flash Sale สูงสุด 50% &nbsp;·&nbsp; ส่งฟรีทั่วไทย เมื่อซื้อครบ 500 บาท &nbsp;·&nbsp; โค้ด{" "}
         <span className="font-bold bg-white/20 rounded px-1.5 py-0.5 mx-1">FREESHIP500</span>
       </div>
 
@@ -50,7 +50,7 @@ export default function Navbar() {
             </div>
             <div className="hidden sm:block">
               <p className="text-white font-bold text-base leading-tight">ShopSanook</p>
-              <p className="text-amber-400 text-[10px] tracking-widest uppercase font-medium">ช้อปสนุก ราคาดี</p>
+              <p className="text-amber-400 text-[10px] tracking-widest uppercase font-medium">IT & Gaming Store</p>
             </div>
           </Link>
 
@@ -58,7 +58,7 @@ export default function Navbar() {
           <div className="relative flex-1 max-w-xl hidden md:block">
             <input
               type="text"
-              placeholder="ค้นหาสินค้า เช่น เสื้อยืด, รองเท้า..."
+              placeholder="ค้นหาสินค้า เช่น keyboard, mouse, headset..."
               className="w-full bg-gray-800 border border-white/10 rounded-full py-2.5 pl-4 pr-14 text-sm text-white placeholder-gray-500 outline-none focus:border-amber-400 transition-colors"
             />
             <button className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-amber-400 hover:bg-amber-300 transition-colors rounded-full w-8 h-8 flex items-center justify-center text-gray-950">
@@ -73,18 +73,18 @@ export default function Navbar() {
           <div className="flex items-center gap-1 ml-auto">
             {/* Desktop icons */}
             <div className="hidden md:flex items-center gap-1">
-              <Link href="/wishlist" className="p-2 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors">
+              <Link href="/wishlist" className="p-2 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors" title="รายการโปรด">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </Link>
-              <Link href="/account" className="p-2 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors">
+              <Link href="/account" className="p-2 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors" title="บัญชีของฉัน">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </Link>
-              <Link href="/cart" className="relative p-2 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors">
+              <Link href="/cart" className="relative p-2 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors" title="ตะกร้าสินค้า">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                   <line x1="3" y1="6" x2="21" y2="6" />
@@ -167,7 +167,7 @@ export default function Navbar() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="ค้นหาสินค้า..."
+                placeholder="ค้นหา keyboard, mouse, headset..."
                 className="w-full bg-gray-800 border border-white/10 rounded-xl py-2.5 pl-4 pr-10 text-sm text-white placeholder-gray-500 outline-none focus:border-amber-400 transition-colors"
               />
               <svg
