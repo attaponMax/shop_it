@@ -9,7 +9,6 @@ const categories = [
   { label: "เมาส์", href: "/category/mouse" },
   { label: "หูฟัง & ลำโพง", href: "/category/headset" },
   { label: "Monitor", href: "/category/monitor" },
-  { label: "Webcam", href: "/category/webcam" },
   { label: "Storage & SSD", href: "/category/storage" },
   { label: "Gaming Gear", href: "/category/gaming" },
   { label: "แบรนด์ยอดนิยม", href: "/brands" },
