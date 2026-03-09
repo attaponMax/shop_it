@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import PageLoader from "./components/Loading";
 import Chatbot from "./components/chatbot";
 import "./globals.css";
 
@@ -19,12 +20,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-        <Chatbot /> 
+    <html lang="th">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <PageLoader>
+          {children}
+        </PageLoader>
+        <Chatbot />
       </body>
     </html>
   );
