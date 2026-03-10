@@ -193,7 +193,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
             <div className="w-9 h-9 rounded-lg bg-amber-400 flex items-center justify-center text-gray-950 font-bold text-lg">S</div>
             <div className="hidden sm:block">
-              <p className="text-white font-bold text-base leading-tight">ShopSanook</p>
+              <p className="text-white font-bold text-base leading-tight">SmartTech</p>
               <p className="text-amber-400 text-[10px] tracking-widest uppercase font-medium">IT & Gaming Store</p>
             </div>
           </Link>

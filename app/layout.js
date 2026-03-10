@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "ShopSanook - ช้อปสนุก",
+  title: "SmartTech - ช้อปสนุก",
   description: "แหล่งรวมสินค้าคุณภาพดี",
 };
 
