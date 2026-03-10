@@ -138,7 +138,7 @@ export default function Home() {
               {/* Main image */}
               <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1593640408182-31c228210673?w=700&q=80"
+                  src="https://www.mount-it.com/cdn/shop/articles/Matty_--set-up-photos-for-mount--it--2024-10-30-03-50-21--manual_f37b66c4-7741-4a18-a151-5128bd6b578f.jpg?crop=center&height=1200&v=1763580143&width=1200"
                   alt="IT Setup"
                   className="w-full h-72 md:h-96 object-cover"
                 />
