@@ -11,7 +11,6 @@ const supabase = createClient(
 );
 
 const categories = [
-  { label: "⚡ Flash Sale", href: "/deals", hot: true },
   { label: "คีย์บอร์ด", href: "/category/keyboard" },
   { label: "เมาส์", href: "/category/mouse" },
   { label: "หูฟัง & ลำโพง", href: "/category/headset" },
