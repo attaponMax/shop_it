@@ -30,7 +30,7 @@ export default function PageLoader({ children }) {
               S
             </div>
             <div>
-              <p className="text-white font-bold text-lg leading-tight">ShopSanook</p>
+              <p className="text-white font-bold text-lg leading-tight">SmartTech</p>
               <p className="text-amber-400 text-[10px] tracking-widest uppercase font-medium">IT & Gaming Store</p>
             </div>
           </div>
