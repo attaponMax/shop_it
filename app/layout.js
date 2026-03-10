@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import PageLoader from "./components/Loading";
-import Chatbot from "./components/chatbot";
+import SanookBot from "./components/SanookBot";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         <PageLoader>
           {children}
         </PageLoader>
-        <Chatbot />
+        <SanookBot />
       </body>
     </html>
   );
