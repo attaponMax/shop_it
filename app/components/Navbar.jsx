@@ -17,6 +17,7 @@ const categories = [
   { label: "Monitor", href: "/category/monitor" },
   { label: "Storage & SSD", href: "/category/storage" },
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Admin", href: "/admin" },
 ];
 
 // ─── User Dropdown ────────────────────────────────────────────
