@@ -1,10 +1,14 @@
 "use client";
 
+// ─── ป้องกัน Hydration Error ──────────────────
+// "use client" ทำให้ component นี้ render บน client เท่านั้น
+// ไม่มี SSR → ไม่มี mismatch
+
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "../components/Navbar";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabase"; // ← singleton client
 import {
-  LineChart, Line, BarChart, Bar, AreaChart, Area,
+  AreaChart, Area, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, PieChart, Pie,
 } from "recharts";
@@ -58,7 +62,7 @@ const colorMap = {
   emerald: { bg: "bg-emerald-400/10", border: "border-emerald-400/20", icon: "text-emerald-400" },
 };
 
-// ─── Auth Screens ──────────────────────────────
+// ─── Screens ───────────────────────────────────
 function LoadingScreen() {
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -84,7 +88,7 @@ function NotLoggedIn() {
         <p className="text-gray-400 text-sm mb-8">กรุณาเข้าสู่ระบบเพื่อเข้าถึง Dashboard</p>
         <div className="flex gap-3 w-full">
           <a href="/login" className="flex-1 text-center bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold py-3 rounded-xl text-sm transition-all hover:-translate-y-0.5">เข้าสู่ระบบ</a>
-          <a href="/" className="flex-1 text-center border border-white/15 hover:bg-white/5 text-white font-medium py-3 rounded-xl text-sm transition-colors">กลับหน้าแรก</a>
+          <a href="/" className="flex-1 text-center border border-white/15 hover:bg-white/5 text-white font-medium py-3 rounded-xl text-sm">กลับหน้าแรก</a>
         </div>
       </div>
     </div>
@@ -92,7 +96,6 @@ function NotLoggedIn() {
 }
 
 function AccessDenied({ userData, session }) {
-  // ── Debug panel: แสดงข้อมูลจริงจาก Supabase ──
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <Navbar />
@@ -105,49 +108,25 @@ function AccessDenied({ userData, session }) {
         <span className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full mb-4">403 — Access Denied</span>
         <h1 className="text-2xl font-bold mb-2">ไม่มีสิทธิ์เข้าถึง</h1>
         <p className="text-gray-400 text-sm mb-4">หน้านี้สำหรับ <span className="text-amber-400 font-semibold">Admin</span> เท่านั้น</p>
-
-        {/* Debug info */}
         <div className="w-full bg-gray-900 border border-white/10 rounded-xl p-4 text-left mb-6 text-xs space-y-2">
           <p className="text-gray-500 font-semibold uppercase tracking-wider text-[10px] mb-2">Debug Info</p>
+          <div className="flex justify-between"><span className="text-gray-500">email</span><span className="text-gray-300">{session?.user?.email}</span></div>
           <div className="flex justify-between">
-            <span className="text-gray-500">auth.uid</span>
-            <span className="text-gray-300 font-mono text-[10px]">{session?.user?.id?.slice(0, 8)}...</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">email</span>
-            <span className="text-gray-300">{session?.user?.email}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">name (users table)</span>
-            <span className="text-gray-300">{userData?.name ?? <span className="text-red-400">ไม่พบใน users table</span>}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">role (users table)</span>
+            <span className="text-gray-500">role</span>
             <span className={`font-semibold ${userData?.role === "admin" ? "text-green-400" : "text-red-400"}`}>
-              {userData?.role ?? "null — ไม่พบ row"}
+              {userData?.role ?? "ไม่พบ row ใน users table"}
             </span>
           </div>
-          {!userData && (
-            <p className="text-red-400 text-[10px] pt-1 border-t border-white/5">
-              ⚠️ ไม่พบ row ใน <code>users</code> table สำหรับ uid นี้<br/>
-              ตรวจสอบว่า user นี้ถูก insert ลง users table หรือยัง
-            </p>
-          )}
           {userData && userData.role !== "admin" && (
-            <p className="text-amber-400 text-[10px] pt-1 border-t border-white/5">
-              ⚠️ role ปัจจุบันคือ <strong>{userData.role}</strong><br/>
-              แก้เป็น <strong>admin</strong> ใน Supabase Table Editor แล้ว logout/login ใหม่
+            <p className="text-amber-400 text-[10px] pt-2 border-t border-white/5">
+              แก้ใน Supabase: <code>UPDATE users SET role = &apos;admin&apos; WHERE email = &apos;{session?.user?.email}&apos;;</code>
             </p>
           )}
         </div>
-
-        <div className="flex gap-3 w-full">
-          <a href="/" className="flex-1 text-center bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold py-3 rounded-xl text-sm transition-all hover:-translate-y-0.5">กลับหน้าแรก</a>
-          <button onClick={() => supabase.auth.signOut().then(() => window.location.href = "/login")}
-            className="flex-1 text-center border border-white/15 hover:bg-white/5 text-white font-medium py-3 rounded-xl text-sm transition-colors">
-            Logout แล้ว Login ใหม่
-          </button>
-        </div>
+        <button onClick={() => supabase.auth.signOut().then(() => window.location.href = "/login")}
+          className="w-full bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold py-3 rounded-xl text-sm transition-all">
+          Logout แล้ว Login ใหม่
+        </button>
       </div>
     </div>
   );
@@ -155,8 +134,8 @@ function AccessDenied({ userData, session }) {
 
 // ─── Auth Guard ────────────────────────────────
 export default function ChatbotDashboard() {
-  const [session, setSession]   = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [session, setSession]     = useState(null);
+  const [userData, setUserData]   = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
@@ -174,37 +153,37 @@ export default function ChatbotDashboard() {
   }, []);
 
   const fetchUser = async (id) => {
-    const { data, error } = await supabase
-      .from("users")
-      .select("name, role")
-      .eq("id", id)
-      .single();
-    if (error) console.error("fetchUser error:", error.message);
+    const { data } = await supabase.from("users").select("name, role").eq("id", id).single();
     setUserData(data ?? null);
     setAuthLoading(false);
   };
 
-  if (authLoading)  return <LoadingScreen />;
-  if (!session)     return <NotLoggedIn />;
+  if (authLoading) return <LoadingScreen />;
+  if (!session)    return <NotLoggedIn />;
   if (userData?.role !== "admin") return <AccessDenied userData={userData} session={session} />;
   return <DashboardContent session={session} userData={userData} />;
 }
 
-// ─── Dashboard ─────────────────────────────────
-function DashboardContent({ session, userData }) {
+// ─── Dashboard Content ─────────────────────────
+function DashboardContent({ userData }) {
   const RANGES = ["7 วัน", "30 วัน", "90 วัน"];
-  const [range, setRange]       = useState("7 วัน");
-  const [stats, setStats]       = useState(null);
-  const [fetching, setFetching] = useState(true);
+  const [range, setRange]         = useState("7 วัน");
+  const [stats, setStats]         = useState(null);
+  const [fetching, setFetching]   = useState(true);
   const [fetchError, setFetchError] = useState(null);
-  const [nowStr, setNowStr]     = useState("");
   const [activeNow, setActiveNow] = useState(0);
 
+  // ── ใช้ state แทน new Date() ตรงๆ เพื่อป้องกัน hydration error ──
+  const [nowStr, setNowStr] = useState("");
   useEffect(() => {
-    const update = () => setNowStr(new Date().toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" }));
-    update(); const t = setInterval(update, 60000); return () => clearInterval(t);
+    const update = () =>
+      setNowStr(new Date().toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" }));
+    update();
+    const t = setInterval(update, 60000);
+    return () => clearInterval(t);
   }, []);
 
+  // ── Live active sessions ──
   const fetchActive = useCallback(async () => {
     const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
     const { count } = await supabase
@@ -221,6 +200,7 @@ function DashboardContent({ session, userData }) {
     return () => clearInterval(t);
   }, [fetchActive]);
 
+  // ── Main data fetch ──
   const fetchStats = useCallback(async () => {
     setFetching(true);
     setFetchError(null);
@@ -235,15 +215,13 @@ function DashboardContent({ session, userData }) {
         supabase.from("chat_messages").select("response_ms, created_at").eq("role", "assistant").not("response_ms", "is", null).gte("created_at", since),
       ]);
 
-      // Check for errors
       const firstError = [r1, r2, r3, r4].find((r) => r.error);
-      if (firstError?.error) throw new Error(firstError.error.message);
+      if (firstError?.error) throw new Error(`${firstError.error.message} (code: ${firstError.error.code})`);
 
       const sessions     = r1.data || [];
       const responseRows = r4.data || [];
       const intentRows   = r3.data || [];
 
-      // KPI
       const totalSessions  = sessions.length;
       const resolved       = sessions.filter((s) => s.resolved).length;
       const escalated      = sessions.filter((s) => s.escalated).length;
@@ -255,12 +233,10 @@ function DashboardContent({ session, userData }) {
       const escalationRate = totalSessions ? ((escalated / totalSessions) * 100).toFixed(1) : "0";
       const slaPct         = resMs.length ? Math.round((resMs.filter((ms) => ms < 2000).length / resMs.length) * 100) : 0;
 
-      // Sessions per day
       const sessionsByDay = {};
       sessions.forEach((s) => { const d = fmtDate(s.started_at); sessionsByDay[d] = (sessionsByDay[d] || 0) + 1; });
       const conversationChart = Object.entries(sessionsByDay).map(([day, value]) => ({ day, value }));
 
-      // Response time per day
       const rsByDay = {};
       responseRows.forEach((r) => {
         const d = fmtDate(r.created_at);
@@ -268,11 +244,9 @@ function DashboardContent({ session, userData }) {
         rsByDay[d].push(r.response_ms);
       });
       const responseChart = Object.entries(rsByDay).map(([day, arr]) => ({
-        day,
-        value: +(arr.reduce((a, b) => a + b, 0) / arr.length / 1000).toFixed(2),
+        day, value: +(arr.reduce((a, b) => a + b, 0) / arr.length / 1000).toFixed(2),
       }));
 
-      // Escalation by hour
       const escByHour = {}; const totalByHour = {};
       sessions.filter((s) => s.escalated).forEach((s) => { const h = new Date(s.started_at).getHours(); escByHour[h] = (escByHour[h] || 0) + 1; });
       sessions.forEach((s) => { const h = new Date(s.started_at).getHours(); totalByHour[h] = (totalByHour[h] || 0) + 1; });
@@ -281,14 +255,12 @@ function DashboardContent({ session, userData }) {
         return { hour: String(h).padStart(2, "0"), rate: totalByHour[h] ? Math.round(((escByHour[h] || 0) / totalByHour[h]) * 100) : 0 };
       });
 
-      // Top intents
       const intentCount = {};
       intentRows.forEach((r) => { intentCount[r.intent] = (intentCount[r.intent] || 0) + 1; });
       const topIntents = Object.entries(intentCount)
         .sort((a, b) => b[1] - a[1]).slice(0, 7)
         .map(([intent, count], i, arr) => ({ intent, count, pct: Math.round((count / arr[0][1]) * 100) }));
 
-      // CSAT dist
       const csatDist = [
         { label: "ดีมาก 😄", score: 5, color: "#4ade80" },
         { label: "ดี 🙂",     score: 4, color: "#fbbf24" },
@@ -302,7 +274,7 @@ function DashboardContent({ session, userData }) {
 
       setStats({ kpi: { totalSessions, resolutionRate, escalationRate, avgCsat, avgResponseMs, slaPct }, conversationChart, responseChart, escalationChart, topIntents, csatDist, csatCount: csatScores.length });
     } catch (err) {
-      console.error("fetchStats error:", err);
+      console.error("fetchStats:", err);
       setFetchError(err.message);
     } finally {
       setFetching(false);
@@ -312,12 +284,12 @@ function DashboardContent({ session, userData }) {
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
   const kpiCards = stats ? [
-    { key: "conversations", label: "สนทนาทั้งหมด",       value: stats.kpi.totalSessions,                        suffix: "",   color: "amber",   icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" },
-    { key: "resolution",    label: "แก้ปัญหาสำเร็จ",      value: parseFloat(stats.kpi.resolutionRate),           suffix: "%",  color: "green",   icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
-    { key: "escalation",    label: "ส่งต่อ agent",         value: parseFloat(stats.kpi.escalationRate),           suffix: "%",  color: "orange",  icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
-    { key: "csat",          label: "CSAT Score",           value: parseFloat(stats.kpi.avgCsat) || 0,             suffix: "/5", color: "blue",    icon: "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
-    { key: "response",      label: "Response Time เฉลี่ย", value: +(stats.kpi.avgResponseMs / 1000).toFixed(2),   suffix: "s",  color: "violet",  icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-    { key: "active",        label: "กำลังสนทนาอยู่",       value: activeNow,                                      suffix: "",   color: "emerald", live: true, icon: "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9 10a3 3 0 106 0 3 3 0 00-6 0z" },
+    { key: "conv",     label: "สนทนาทั้งหมด",       value: stats.kpi.totalSessions,                       suffix: "",   color: "amber",   icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" },
+    { key: "res",      label: "แก้ปัญหาสำเร็จ",      value: parseFloat(stats.kpi.resolutionRate),          suffix: "%",  color: "green",   icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
+    { key: "esc",      label: "ส่งต่อ agent",         value: parseFloat(stats.kpi.escalationRate),          suffix: "%",  color: "orange",  icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
+    { key: "csat",     label: "CSAT Score",           value: parseFloat(stats.kpi.avgCsat) || 0,            suffix: "/5", color: "blue",    icon: "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+    { key: "resp",     label: "Response Time เฉลี่ย", value: +(stats.kpi.avgResponseMs / 1000).toFixed(2),  suffix: "s",  color: "violet",  icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+    { key: "active",   label: "กำลังสนทนาอยู่",       value: activeNow,                                     suffix: "",   color: "emerald", live: true, icon: "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9 10a3 3 0 106 0 3 3 0 00-6 0z" },
   ] : [];
 
   return (
@@ -330,8 +302,7 @@ function DashboardContent({ session, userData }) {
           <div>
             <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
               <a href="/" className="hover:text-amber-400 transition-colors">หน้าแรก</a>
-              <span>/</span>
-              <span className="text-gray-300">Chatbot Dashboard</span>
+              <span>/</span><span className="text-gray-300">Chatbot Dashboard</span>
             </div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <span className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
@@ -342,7 +313,10 @@ function DashboardContent({ session, userData }) {
               Chatbot KPI Dashboard
               <span className="text-[10px] font-semibold bg-amber-400/10 border border-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">Admin</span>
             </h1>
-            <p className="text-gray-500 text-xs mt-1">อัปเดตล่าสุด: {nowStr} · {userData?.name}</p>
+            {/* nowStr ใส่ใน useEffect ป้องกัน hydration */}
+            <p className="text-gray-500 text-xs mt-1">
+              {nowStr ? `อัปเดตล่าสุด: ${nowStr}` : ""} · {userData?.name}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={fetchStats} disabled={fetching}
@@ -371,9 +345,7 @@ function DashboardContent({ session, userData }) {
             <div>
               <p className="text-red-400 text-sm font-semibold">โหลดข้อมูลไม่สำเร็จ</p>
               <p className="text-red-300/70 text-xs mt-0.5 font-mono">{fetchError}</p>
-              <p className="text-gray-500 text-xs mt-1">
-                ตรวจสอบว่ารัน SQL Schema แล้วหรือยัง และ RLS policies ถูกต้อง
-              </p>
+              <p className="text-gray-500 text-xs mt-1">ตรวจสอบว่ารัน chatbot_analytics_schema.sql และ fix_chat_rls.sql แล้วหรือยัง</p>
             </div>
           </div>
         )}
@@ -388,16 +360,16 @@ function DashboardContent({ session, userData }) {
           </div>
         )}
 
-        {/* Empty state — tables exist but no data yet */}
+        {/* Empty */}
         {stats && stats.kpi.totalSessions === 0 && !fetchError && (
           <div className="bg-gray-900 border border-white/8 rounded-2xl px-6 py-12 text-center mb-8">
             <p className="text-4xl mb-3">💬</p>
             <p className="text-white font-semibold mb-1">ยังไม่มีข้อมูล Chatbot</p>
-            <p className="text-gray-500 text-sm">เริ่มใช้งาน SanookBot แล้วข้อมูลจะปรากฏที่นี่</p>
+            <p className="text-gray-500 text-sm">เริ่มใช้งาน SanookBot แล้วข้อมูลจะปรากฏที่นี่อัตโนมัติ</p>
           </div>
         )}
 
-        {stats && (
+        {stats && stats.kpi.totalSessions > 0 && (
           <>
             {/* KPI Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
@@ -425,7 +397,7 @@ function DashboardContent({ session, userData }) {
               })}
             </div>
 
-            {/* Row 1: Conversations + Response Time */}
+            {/* Row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-900 border border-white/8 rounded-2xl p-5">
                 <SectionHeader label="Volume" title="จำนวน Sessions รายวัน"/>
@@ -434,8 +406,7 @@ function DashboardContent({ session, userData }) {
                     <AreaChart data={stats.conversationChart} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.25}/>
-                          <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.25}/><stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08"/>
@@ -470,7 +441,7 @@ function DashboardContent({ session, userData }) {
               </div>
             </div>
 
-            {/* Row 2: CSAT + Escalation */}
+            {/* Row 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-900 border border-white/8 rounded-2xl p-5">
                 <SectionHeader label="Satisfaction" title={`CSAT Score (${stats.csatCount} ratings)`}/>
@@ -527,7 +498,7 @@ function DashboardContent({ session, userData }) {
               </div>
             </div>
 
-            {/* Row 3: Top Intents + Resolution */}
+            {/* Row 3 */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
               <div className="lg:col-span-2 bg-gray-900 border border-white/8 rounded-2xl p-5">
                 <SectionHeader label="Intents" title="Top Intents / คำถามยอดนิยม"/>
