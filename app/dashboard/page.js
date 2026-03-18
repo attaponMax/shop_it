@@ -108,21 +108,9 @@ function AccessDenied({ userData, session }) {
         <span className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full mb-4">403 — Access Denied</span>
         <h1 className="text-2xl font-bold mb-2">ไม่มีสิทธิ์เข้าถึง</h1>
         <p className="text-gray-400 text-sm mb-4">หน้านี้สำหรับ <span className="text-amber-400 font-semibold">Admin</span> เท่านั้น</p>
-        <div className="w-full bg-gray-900 border border-white/10 rounded-xl p-4 text-left mb-6 text-xs space-y-2">
-          <p className="text-gray-500 font-semibold uppercase tracking-wider text-[10px] mb-2">Debug Info</p>
-          <div className="flex justify-between"><span className="text-gray-500">email</span><span className="text-gray-300">{session?.user?.email}</span></div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">role</span>
-            <span className={`font-semibold ${userData?.role === "admin" ? "text-green-400" : "text-red-400"}`}>
-              {userData?.role ?? "ไม่พบ row ใน users table"}
-            </span>
-          </div>
-          {userData && userData.role !== "admin" && (
-            <p className="text-amber-400 text-[10px] pt-2 border-t border-white/5">
-              แก้ใน Supabase: <code>UPDATE users SET role = &apos;admin&apos; WHERE email = &apos;{session?.user?.email}&apos;;</code>
-            </p>
-          )}
-        </div>
+        <p className="text-gray-400 text-sm mb-8">
+          หน้านี้จำกัดสิทธิ์สำหรับผู้ใช้งานที่เป็น <span className="text-amber-400 font-semibold">Admin</span> เท่านั้น หากต้องการสิทธิ์เข้าถึง กรุณาติดต่อเจ้าของระบบหรือผู้ดูแล
+        </p>
         <button onClick={() => supabase.auth.signOut().then(() => window.location.href = "/login")}
           className="w-full bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold py-3 rounded-xl text-sm transition-all">
           Logout แล้ว Login ใหม่

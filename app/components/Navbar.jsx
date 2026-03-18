@@ -12,14 +12,12 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const categories = [
+const baseCategories = [
   { label: "คีย์บอร์ด", href: "/category/keyboard" },
   { label: "เมาส์", href: "/category/mouse" },
   { label: "หูฟัง & ลำโพง", href: "/category/headset" },
   { label: "Monitor", href: "/category/monitor" },
   { label: "Storage & SSD", href: "/category/storage" },
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Admin", href: "/admin" },
 ];
 
 // ─── User Dropdown ────────────────────────────────────────────
@@ -184,6 +182,15 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const isAdmin = userData?.role === "admin";
+  const navCategories = [
+    ...baseCategories,
+    ...(isAdmin ? [
+      { label: "Dashboard", href: "/dashboard", hot: true },
+      { label: "Admin", href: "/admin", hot: true },
+    ] : []),
+  ];
+
   return (
     <div>
       <Toast />
@@ -282,7 +289,7 @@ export default function Navbar() {
         {/* Category Bar */}
         <div className="bg-gray-900 border-t border-white/[0.06]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-1 h-11 overflow-x-auto">
-            {categories.map((cat) => (
+            {navCategories.map((cat) => (
               <Link key={cat.href} href={cat.href}
                 className={`flex-shrink-0 flex items-center gap-1.5 text-sm px-3.5 py-1.5 rounded-full transition-colors whitespace-nowrap ${
                   cat.hot ? "bg-amber-400 text-gray-950 font-semibold" : "text-gray-400 hover:text-amber-400 hover:bg-amber-400/10"
@@ -309,7 +316,7 @@ export default function Navbar() {
             </form>
 
             <div className="flex flex-col gap-0.5">
-              {categories.map((cat) => (
+              {navCategories.map((cat) => (
                 <Link key={cat.href} href={cat.href} onClick={() => setIsMenuOpen(false)}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-amber-400 hover:bg-white/5 transition-colors">
                   {cat.label}
