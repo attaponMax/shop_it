@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "shopSanookCart";
+const STORAGE_KEY = "shopCart";
 
 export function getCart() {
   if (typeof window === "undefined") return [];

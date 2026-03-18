@@ -556,7 +556,7 @@ function DashboardContent({ userData }) {
         )}
 
         <p className="text-center text-gray-700 text-[10px] mt-8">
-          Real-time data from Supabase · ShopSanook Chatbot Dashboard © 2026
+          Real-time data from Supabase · ShopTech Chatbot Dashboard © 2026
         </p>
       </div>
     </div>

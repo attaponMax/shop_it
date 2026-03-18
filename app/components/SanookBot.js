@@ -114,7 +114,7 @@ function CsatWidget({ onRate, onSkip }) {
 export default function SanookBot() {
   const [open, setOpen]           = useState(false);
   const [messages, setMessages]   = useState([
-    { role: "assistant", content: "สวัสดีครับ! 👋 ผม SanookBot ผู้ช่วยของร้าน ShopSanook\nช่วยอะไรได้บ้างครับ?", time: now() },
+    { role: "assistant", content: "สวัสดีครับ! 👋 ผม SmartBot ผู้ช่วยของร้าน SmartTech\nช่วยอะไรได้บ้างครับ?", time: now() },
   ]);
   const [input, setInput]         = useState("");
   const [loading, setLoading]     = useState(false);

@@ -354,7 +354,7 @@ function CartContent({ user }) {
       <footer className="border-t border-white/8 bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <p className="text-white font-bold">ShopSanook</p>
+            <p className="text-white font-bold">Shoptech</p>
             <p className="text-gray-600 text-xs mt-0.5">© 2026 All rights reserved.</p>
           </div>
           <div className="flex gap-6 text-xs text-gray-500">
