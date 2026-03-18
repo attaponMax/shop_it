@@ -495,13 +495,21 @@ function ProductsContent({ userData }) {
               <span className="text-[10px] font-semibold bg-amber-400/10 border border-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">Admin</span>
             </h1>
           </div>
-          <button onClick={() => setModal("add")}
-            className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-all hover:-translate-y-0.5 shadow-lg shadow-amber-400/20">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path d="M12 4v16m8-8H4"/>
-            </svg>
-            เพิ่มสินค้า
-          </button>
+          <div className="flex items-center gap-2">
+            <a href="/admin/users" className="flex items-center gap-2 border border-white/15 hover:bg-white/5 text-white px-4 py-2.5 rounded-xl text-sm transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M16 11V5a3 3 0 00-6 0v6m-4 4h14a2 2 0 012 2v1a2 2 0 01-2 2H6a2 2 0 01-2-2v-1a2 2 0 012-2z"/>
+              </svg>
+              จัดการผู้ใช้
+            </a>
+            <button onClick={() => setModal("add")}
+              className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-all hover:-translate-y-0.5 shadow-lg shadow-amber-400/20">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M12 4v16m8-8H4"/>
+              </svg>
+              เพิ่มสินค้า
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
