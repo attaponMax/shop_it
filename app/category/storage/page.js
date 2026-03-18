@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
+import { useCart } from "../../lib/cart";
 
 const filters = {
   type: ["ทั้งหมด", "NVMe M.2", "SSD SATA", "HDD Internal", "Portable SSD", "External HDD", "USB Flash Drive"],
@@ -131,6 +132,7 @@ function StarRating({ rating }) {
 }
 
 export default function StorageCategory() {
+  const { addToCart } = useCart();
   const [activeType, setActiveType] = useState("ทั้งหมด");
   const [activeCapacity, setActiveCapacity] = useState("ทั้งหมด");
   const [activeBrand, setActiveBrand] = useState("ทั้งหมด");
@@ -443,7 +445,24 @@ export default function StorageCategory() {
                           <p className="text-amber-400 font-bold text-base">฿{p.price.toLocaleString()}</p>
                           <p className="text-gray-600 text-xs line-through">฿{p.originalPrice.toLocaleString()}</p>
                         </div>
-                        <button onClick={(e) => e.preventDefault()} disabled={!p.inStock}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!p.inStock) return;
+                            addToCart({
+                              id: p.id,
+                              name: p.name,
+                              brand: p.brand,
+                              price: p.price,
+                              originalPrice: p.originalPrice,
+                              img: p.img,
+                              tag: p.tags?.join(", ") || "",
+                              qty: 1,
+                              stock: p.inStock ? 999 : 0,
+                            });
+                          }}
+                          disabled={!p.inStock}
                           className={`text-xs font-semibold px-3 py-2 rounded-lg transition-colors ${
                             p.inStock ? "bg-amber-400 hover:bg-amber-300 text-gray-950" : "bg-gray-800 text-gray-600 cursor-not-allowed"
                           }`}>

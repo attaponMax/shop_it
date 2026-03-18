@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
+import { useCart } from "../../lib/cart";
 
 const filters = {
   type: ["ทั้งหมด", "Gaming", "Office", "Ergonomic", "Trackball"],
@@ -137,6 +138,7 @@ function StarRating({ rating }) {
 }
 
 export default function MouseCategory() {
+  const { addToCart } = useCart();
   const [activeType, setActiveType] = useState("ทั้งหมด");
   const [activeConnect, setActiveConnect] = useState("ทั้งหมด");
   const [activeDpi, setActiveDpi] = useState("ทั้งหมด");
@@ -435,7 +437,22 @@ export default function MouseCategory() {
                           <p className="text-gray-600 text-xs line-through">฿{p.originalPrice.toLocaleString()}</p>
                         </div>
                         <button
-                          onClick={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!p.inStock) return;
+                            addToCart({
+                              id: p.id,
+                              name: p.name,
+                              brand: p.brand,
+                              price: p.price,
+                              originalPrice: p.originalPrice,
+                              img: p.img,
+                              tag: p.tags?.join(", ") || "",
+                              qty: 1,
+                              stock: p.inStock ? 999 : 0,
+                            });
+                          }}
                           disabled={!p.inStock}
                           className={`text-xs font-semibold px-3 py-2 rounded-lg transition-colors ${
                             p.inStock

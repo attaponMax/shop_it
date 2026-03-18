@@ -3,17 +3,12 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { createClient } from "@supabase/supabase-js";
+import { useCart } from "../lib/cart";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
-
-const initialCartItems = [
-  { id: 1, name: "Mechanical Keyboard RGB Pro", brand: "Lorgar", price: 2990, originalPrice: 4500, qty: 1, img: "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&q=80", tag: "Mechanical · RGB · Hot-swap", stock: 12 },
-  { id: 2, name: "True Wireless Earbuds Pro", brand: "HECATE", price: 1490, originalPrice: 2200, qty: 2, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&q=80", tag: "ANC · 30hr Battery · IPX5", stock: 5 },
-  { id: 3, name: "Gaming Mouse Wireless", brand: "Logitech", price: 3290, originalPrice: 3990, qty: 1, img: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=400&q=80", tag: "25600 DPI · Wireless · RGB", stock: 8 },
-];
 
 function CouponInput({ onApply }) {
   const [code, setCode] = useState("");
@@ -45,7 +40,7 @@ function EmptyCart() {
       </div>
       <h3 className="text-white text-lg font-bold mb-2">ตะกร้าสินค้าว่างเปล่า</h3>
       <p className="text-gray-500 text-sm mb-8 max-w-xs">ยังไม่มีสินค้าในตะกร้า เพิ่มสินค้าที่คุณสนใจเพื่อดำเนินการสั่งซื้อ</p>
-      <a href="/products" className="bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold px-8 py-3 rounded-xl text-sm transition-all hover:-translate-y-0.5">เลือกซื้อสินค้า 🛒</a>
+      <a href="/category" className="bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold px-8 py-3 rounded-xl text-sm transition-all hover:-translate-y-0.5">เลือกซื้อสินค้า 🛒</a>
     </div>
   );
 }
@@ -106,7 +101,7 @@ export default function CartPage() {
 
 // ─── Cart Content ─────────────────────────────────────────────
 function CartContent({ user }) {
-  const [items, setItems] = useState(initialCartItems);
+  const { cart: items, addToCart, updateCartItem, removeFromCart, clearCart } = useCart();
   const [discount, setDiscount] = useState(0);
   const [removingId, setRemovingId] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -120,13 +115,16 @@ function CartContent({ user }) {
   const displayName = userData?.name || user?.user_metadata?.name || user?.email || "ผู้ใช้";
   const displayInitial = displayName[0]?.toUpperCase() || "U";
 
-  const updateQty = (id, delta) => setItems((prev) =>
-    prev.map((item) => item.id === id ? { ...item, qty: Math.max(1, Math.min(item.stock, item.qty + delta)) } : item)
-  );
+  const updateQty = (id, delta) => {
+    const item = items.find((item) => item.id === id);
+    if (!item) return;
+    const nextQty = Math.max(1, Math.min(item.stock ?? Infinity, item.qty + delta));
+    updateCartItem(id, { qty: nextQty });
+  };
 
   const removeItem = (id) => {
     setRemovingId(id);
-    setTimeout(() => { setItems((prev) => prev.filter((item) => item.id !== id)); setRemovingId(null); }, 300);
+    setTimeout(() => { removeFromCart(id); setRemovingId(null); }, 300);
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -229,7 +227,7 @@ function CartContent({ user }) {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                   ช้อปต่อ
                 </a>
-                <button onClick={() => setItems([])} className="text-xs text-gray-600 hover:text-red-400 transition-colors">🗑 ลบสินค้าทั้งหมด</button>
+                <button onClick={() => clearCart()} className="text-xs text-gray-600 hover:text-red-400 transition-colors">🗑 ลบสินค้าทั้งหมด</button>
               </div>
 
               {/* Suggested */}
@@ -256,7 +254,24 @@ function CartContent({ user }) {
                         <p className="text-white text-xs font-semibold leading-snug line-clamp-2 mb-2">{p.name}</p>
                         <div className="flex items-center justify-between">
                           <p className="text-amber-400 font-bold text-sm">฿{p.price.toLocaleString()}</p>
-                          <button className="bg-amber-400/10 hover:bg-amber-400 text-amber-400 hover:text-gray-950 text-[10px] font-bold px-2 py-1 rounded-lg transition-all">+ ตะกร้า</button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              addToCart({
+                                id: p.id,
+                                name: p.name,
+                                brand: p.brand,
+                                price: p.price,
+                                originalPrice: p.originalPrice || p.price,
+                                img: p.img,
+                                tag: "",
+                                qty: 1,
+                                stock: 999,
+                              });
+                            }}
+                            className="bg-amber-400/10 hover:bg-amber-400 text-amber-400 hover:text-gray-950 text-[10px] font-bold px-2 py-1 rounded-lg transition-all"
+                          >+ ตะกร้า</button>
                         </div>
                       </div>
                     </a>

@@ -117,7 +117,7 @@ export default function LoginPage() {
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center text-gray-950 font-bold text-xl">S</div>
           <div>
-            <p className="text-white font-bold text-lg leading-tight">ShopSanook</p>
+            <p className="text-white font-bold text-lg leading-tight">SmartTech</p>
             <p className="text-amber-400 text-[10px] tracking-widest uppercase font-medium">IT & Gaming Store</p>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="relative z-10 text-gray-600 text-xs">© 2026 ShopSanook. All rights reserved.</p>
+        <p className="relative z-10 text-gray-600 text-xs">© 2026 SmartTech. All rights reserved.</p>
       </div>
 
       {/* ─── RIGHT PANEL — form ─── */}
@@ -150,7 +150,7 @@ export default function LoginPage() {
         <div className="lg:hidden flex items-center gap-2.5 mb-10">
           <div className="w-9 h-9 rounded-xl bg-amber-400 flex items-center justify-center text-gray-950 font-bold text-lg">S</div>
           <div>
-            <p className="text-white font-bold text-base leading-tight">ShopSanook</p>
+            <p className="text-white font-bold text-base leading-tight">SmartTech</p>
             <p className="text-amber-400 text-[10px] tracking-widest uppercase">IT & Gaming Store</p>
           </div>
         </div>

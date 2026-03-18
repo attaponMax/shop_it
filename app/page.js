@@ -1,4 +1,7 @@
+"use client";
+
 import Navbar from "./components/Navbar";
+import { useCart } from "./lib/cart";
 
 const featuredProducts = [
   {
@@ -79,6 +82,8 @@ function StarRating({ rating }) {
 }
 
 export default function Home() {
+  const { addToCart } = useCart();
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <Navbar />
@@ -111,7 +116,7 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
               <a
-                href="/deals"
+                href="/category/monitor"
                 className="bg-amber-400 hover:bg-amber-300 text-gray-950 font-bold px-8 py-3.5 rounded-xl text-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(251,191,36,0.35)]"
               >
                 ช้อปเลย 🛒
@@ -250,7 +255,24 @@ export default function Home() {
                     <p className="text-amber-400 font-bold text-base">฿{p.price.toLocaleString()}</p>
                     <p className="text-gray-600 text-xs line-through">฿{p.originalPrice.toLocaleString()}</p>
                   </div>
-                  <button className="bg-amber-400 hover:bg-amber-300 text-gray-950 text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      addToCart({
+                        id: p.id,
+                        name: p.name,
+                        brand: p.brand,
+                        price: p.price,
+                        originalPrice: p.originalPrice,
+                        img: p.img,
+                        tag: p.tag,
+                        qty: 1,
+                        stock: 999,
+                      });
+                    }}
+                    className="bg-amber-400 hover:bg-amber-300 text-gray-950 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
+                  >
                     + ตะกร้า
                   </button>
                 </div>

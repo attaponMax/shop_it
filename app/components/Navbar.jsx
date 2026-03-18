@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { useCart } from "../lib/cart";
+import Toast from "./Toast";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -127,7 +129,7 @@ function UserDropdown({ user, userData, onSignOut }) {
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [cartCount] = useState(3);
+  const { count: cartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
   const [session, setSession] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -184,6 +186,7 @@ export default function Navbar() {
 
   return (
     <div>
+      <Toast />
       <nav className={`sticky top-0 z-50 bg-gray-950 border-b border-white/10 transition-shadow duration-300 ${isScrolled ? "shadow-[0_4px_24px_rgba(0,0,0,0.6)]" : ""}`}>
 
         {/* Top Row */}
